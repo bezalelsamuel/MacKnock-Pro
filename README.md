@@ -2,7 +2,7 @@
 
 Ever wanted to just knock on your MacBook to pause your music or lock your screen? **MacKnock Pro** turns your Mac's chassis into a giant, customizable button. 
 
-By tapping into the hidden accelerometer inside modern Apple Silicon Macs, this app detects physical knocks in real-time using undocumented IOKit magic. 
+By tapping it triggers the hidden accelerometer inside modern Apple Silicon Macs, this app detects physical knocks in real-time using undocumented IOKit magic. 
 
 <p align="center">
   <img src="popover.png" width="400" alt="MacKnock Pro Popover">
