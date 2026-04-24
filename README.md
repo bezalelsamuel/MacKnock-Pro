@@ -5,6 +5,11 @@ Detect physical knocks on your MacBook and trigger system actions like media pla
 
 Uses the Apple Silicon **MEMS accelerometer** (Bosch BMI286 IMU) via the undocumented IOKit HID interface for real-time vibration detection.
 
+<p align="center">
+  <img src="assets/popover.png" width="400" alt="MacKnock Pro Popover">
+</p>
+
+
 ## Features
 
 - 🎵 **Media Control** — Play/Pause, Next Track, Previous Track, Volume Up/Down, Mute
@@ -14,6 +19,8 @@ Uses the Apple Silicon **MEMS accelerometer** (Bosch BMI286 IMU) via the undocum
 - 📊 **Live Waveform Monitor** — Real-time accelerometer data visualization
 - ⚙️ **Sensitivity Profiles** — Sensitive, Balanced, Strong, Fast presets
 - 🎨 **Premium UI** — Beautiful menu bar popover and settings window
+
+![Actions Settings](settings-actions.png)
 
 ## Requirements
 
@@ -35,9 +42,13 @@ Uses the Apple Silicon **MEMS accelerometer** (Bosch BMI286 IMU) via the undocum
 4. **Pattern Recognition** — Buffers knocks to detect double, triple, and quad patterns
 5. **Action Execution** — Maps patterns to configurable system actions
 
+![Vibration Monitor](settings-monitor.png)
+
 ## Understanding Sensitivity Profiles & Sliders
 
 MacKnock Pro uses an adaptive machine-learning threshold engine to learn how hard you hit your Mac, but you can manually tune its baseline behavior using **Profiles** and **Sliders** in the **Sensitivity** tab.
+
+![Sensitivity Profiles](settings-sensitivity.png)
 
 ### Sensitivity Profiles
 These are pre-configured presets that change both the force required to trigger a knock and the time window allowed between knocks.
@@ -81,6 +92,10 @@ the app UI opens but sensor listening will fail with a root-privileges error.
 
 - Sensor reading & IOKit interface: [olvvier/apple-silicon-accelerometer](https://github.com/olvvier/apple-silicon-accelerometer)
 - Vibration detection algorithms: [taigrr/spank](https://github.com/taigrr/spank)
+
+## Settings
+
+![General Settings](settings-general.png)
 
 ## License
 
