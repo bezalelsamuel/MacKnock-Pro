@@ -6,7 +6,7 @@ Detect physical knocks on your MacBook and trigger system actions like media pla
 Uses the Apple Silicon **MEMS accelerometer** (Bosch BMI286 IMU) via the undocumented IOKit HID interface for real-time vibration detection.
 
 <p align="center">
-  <img src="assets/popover.png" width="400" alt="MacKnock Pro Popover">
+  <img src="popover.png" width="400" alt="MacKnock Pro Popover">
 </p>
 
 
