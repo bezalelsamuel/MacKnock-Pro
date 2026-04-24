@@ -1,102 +1,115 @@
+# MacKnock Pro 🤜💻
 
- # MacKnock Pro 🤜💻
+Ever wanted to just knock on your MacBook to pause your music or lock your screen? **MacKnock Pro** turns your Mac's chassis into a giant, customizable button. 
 
-Detect physical knocks on your MacBook and trigger system actions like media play/pause, skip, lock screen, and more.
-
-Uses the Apple Silicon **MEMS accelerometer** (Bosch BMI286 IMU) via the undocumented IOKit HID interface for real-time vibration detection.
+By tapping into the hidden accelerometer inside modern Apple Silicon Macs (specifically the Bosch BMI286 IMU), this app detects physical knocks in real-time using undocumented IOKit magic. 
 
 <p align="center">
   <img src="popover.png" width="400" alt="MacKnock Pro Popover">
 </p>
 
+---
 
-## Features
+## ✨ What It Can Do
 
-- 🎵 **Media Control** — Play/Pause, Next Track, Previous Track, Volume Up/Down, Mute
-- 🔒 **System Actions** — Lock Screen, Screenshot, Do Not Disturb
-- 🤖 **Custom Actions** — Launch Apps, Run Shortcuts, Execute Shell/AppleScript
-- 🎯 **Multi-Knock Patterns** — Double, Triple, and Quad knock recognition
-- 📊 **Live Waveform Monitor** — Real-time accelerometer data visualization
-- ⚙️ **Sensitivity Profiles** — Sensitive, Balanced, Strong, Fast presets
-- 🎨 **Premium UI** — Beautiful menu bar popover and settings window
+* 🎵 **Control Your Tunes:** Play/Pause, skip tracks, or tweak the volume without finding the right keys.
+* 🔒 **Lock It Down:** Quickly lock your screen, grab a screenshot, or toggle Do Not Disturb.
+* 🤖 **Make It Yours:** Map knocks to launch apps, run Apple Shortcuts, or execute custom shell scripts.
+* 🎯 **Pattern Recognition:** Set up different actions for double, triple, and even quadruple knocks.
+* 📊 **See the Vibes:** A live, real-time waveform monitor lets you actually see the accelerometer data.
+* 🎨 **Sleek UI:** Everything is managed from a clean, native menu bar popover and settings window.
 
 ![Actions Settings](settings-actions.png)
 
-## Requirements
+---
 
-- macOS 14.0+ (Sonoma)
-- Apple Silicon Mac (M2, M3, M4, M5 — **not** M1 base models)
-- Root privileges (`sudo`) for accelerometer access
+## 🛠️ What You Need
 
-> **Note**: This app uses undocumented IOKit HID interfaces and cannot be distributed on the Mac App Store.
+Before you dive in, make sure your setup checks these boxes:
 
-## How It Works
+* **macOS 14.0+** (Sonoma)
+* **An Apple Silicon Mac** (M2, M3, M4, or M5). *Note: Base M1 models are not supported.*
+* **Root privileges (`sudo`)** to access the accelerometer.
 
-1. **IOKit HID Bridge** — Opens `AppleSPUHIDDevice` on vendor usage page `0xFF00`, usage `3` (accelerometer)
-2. **Raw HID Reports** — Parses 22-byte reports with int32 x/y/z at byte offset 6, scaled by `/65536` for g-force
-3. **Knock Detection** — Runs 4 algorithms in parallel:
-   - **STA/LTA** (Short-Term/Long-Term Average) at 3 timescales
-   - **CUSUM** (Cumulative Sum) for mean-shift detection
-   - **Kurtosis** for impulsive signal detection (knock = kurtosis > 6)
-   - **Peak/MAD** (Median Absolute Deviation) for outlier detection
-4. **Pattern Recognition** — Buffers knocks to detect double, triple, and quad patterns
-5. **Action Execution** — Maps patterns to configurable system actions
+> **Note:** Because we are poking around in undocumented IOKit HID interfaces, this app isn't allowed on the Mac App Store. 
+
+---
+
+## 🧠 Under the Hood (For the Geeks)
+
+Curious how it actually knows you knocked? Here is the pipeline:
+
+1.  **The HID Bridge:** We open `AppleSPUHIDDevice` on vendor usage page `0xFF00`, usage `3` (the accelerometer).
+2.  **Raw Data Parsing:** The app grabs 22-byte reports, finding the `int32` x/y/z coordinates at byte offset 6, and scales them down (`/65536`) to get standard g-force.
+3.  **The Math:** We run four detection algorithms simultaneously to make sure a knock is actually a knock:
+    * **STA/LTA** (Short/Long-Term Average) checking three different timescales.
+    * **CUSUM** (Cumulative Sum) to spot sudden shifts.
+    * **Kurtosis** to catch sharp, impulsive spikes (if kurtosis > 6, it's a knock!).
+    * **Peak/MAD** (Median Absolute Deviation) to filter out outliers.
+4.  **Pattern Buffering:** The app holds onto your knocks for a split second to see if you're going for a double, triple, or quad combo.
 
 ![Vibration Monitor](settings-monitor.png)
 
-## Understanding Sensitivity Profiles & Sliders
+---
 
-MacKnock Pro uses an adaptive machine-learning threshold engine to learn how hard you hit your Mac, but you can manually tune its baseline behavior using **Profiles** and **Sliders** in the **Sensitivity** tab.
+## 🎛️ Tuning the Sensitivity
+
+Everyone types differently, and every desk is built differently. MacKnock Pro uses an adaptive machine-learning engine to learn your habits, but you can manually tweak the baseline to fit your style.
 
 ![Sensitivity Profiles](settings-sensitivity.png)
 
-### Sensitivity Profiles
-These are pre-configured presets that change both the force required to trigger a knock and the time window allowed between knocks.
+### The Presets
 
-- **Sensitive** (0.03g / 600ms): Detects light taps and gentle touches. Best if you type lightly and want effortless triggering, but may cause false positives if you type heavily.
-- **Balanced** (0.08g / 750ms): The default sweet spot. Responds to firm knocks while ignoring normal typing vibrations and trackpad clicks.
-- **Strong** (0.20g / 1000ms): Only responds to hard, deliberate knocks. You have to physically thump the chassis. Best if you are a very heavy typist or use a mechanical keyboard on the same desk.
-- **Fast** (0.10g / 350ms): Quick response with a very short cooldown. Designed for users who enter their double/triple knocks very rapidly.
+* **Sensitive:** Detects light taps and gentle touches. Perfect if you type lightly and want effortless triggering, but be warned: heavy typing might trigger it by accident!
+* **Balanced:** The default sweet spot. It catches firm knocks but ignores normal typing and aggressive trackpad clicks.
+* **Strong:** Only responds to deliberate, physical thumps. Choose this if you're a heavy typist or if you use a mechanical keyboard on the same desk.
+* **Fast:** Super quick response times. Designed for folks who rapid-fire their double and triple knocks.
 
-### Fine Tuning Sliders
-If the presets don't feel right, you can adjust the underlying math directly:
+### Getting Granular (The Sliders)
 
-- **Noise Guard Floor (Amplitude):** 
-  This sets the absolute minimum g-force (acceleration) required for a vibration to be considered a knock. The adaptive ML engine cannot drop the threshold below this value. 
-  - *Slide Left (Allow Soft Taps):* Lowers the floor (e.g., 0.01g). The app will pick up very subtle finger taps.
-  - *Slide Right (Hard Knocks Only):* Raises the floor (e.g., 0.20g). The app will completely ignore light taps, heavy typing, and desk bumps.
+If the presets aren't quite hitting the mark, you can adjust the math yourself:
 
-- **Cooldown Period (Time Window):**
-  This dictates how long the app waits (in milliseconds) after your first knock to see if you are going to knock again (to form a Double, Triple, or Quad pattern). 
-  - *Slide Left (Fast Response):* Short window (e.g., 300ms). You must tap very quickly. The benefit is that actions trigger almost instantly after your final tap.
-  - *Slide Right (Slow Response):* Long window (e.g., 1000ms). Allows you to pace your knocks slowly and casually. The downside is that the app must wait this entire duration after your final knock before it can "lock in" the pattern and execute your action.
+* **Noise Guard Floor (Amplitude):** This is the absolute minimum force required for the app to care. 
+    * *Slide Left:* Lowers the floor. It will pick up very subtle finger taps.
+    * *Slide Right:* Raises the floor. It will completely ignore light taps, furious typing, or accidental desk bumps.
+* **Cooldown Period (Time Window):** How long the app waits after your first knock to see if another one is coming.
+    * *Slide Left:* Short window. You have to tap incredibly fast, but your actions will trigger almost instantly.
+    * *Slide Right:* Long window. You can pace your knocks casually, but the app takes a moment to "lock in" your final knock before executing the action.
 
-## Building
+---
 
-1. Open `MacKnock Pro.xcodeproj` in Xcode 15+
-2. Select the "MacKnock Pro" scheme
-3. Build & Run (⌘R)
+## 🚀 Building & Running
 
-## Running
+### 1. Build the App
+1. Open `MacKnock Pro.xcodeproj` in Xcode 15 or newer.
+2. Select the "MacKnock Pro" scheme and hit **Build & Run (⌘R)**.
+3. Find your compiled `.app` file (Right-click it under Xcode's "Products" folder -> **"Show in Finder"**).
 
-The app requires root privileges for accelerometer access:
+### 2. Run with Root Privileges
+Because accessing raw hardware sensors is heavily restricted by macOS, **you cannot just double-click the app icon**. If you do, the UI will open normally, but it will silently fail to detect your knocks. You must run the core executable via Terminal using `sudo`.
 
+1. Open the **Terminal** app and type `sudo ` (make sure to include the space).
+2. Right-click your `MacKnock Pro.app` in Finder, choose **"Show Package Contents"**, and navigate to `Contents/MacOS/`.
+3. **Drag and drop** the `MacKnock Pro` executable file straight into your Terminal window. This automatically types out the complex file path for you!
+4. Hit **Enter**, type your Mac password (the characters will be hidden), and hit Enter again.
+
+The final command in your terminal should look something like this:
 ```bash
 sudo /path/to/MacKnock\ Pro.app/Contents/MacOS/MacKnock\ Pro
 ```
-
-There is currently no built-in privilege escalation flow. If you launch without `sudo`,
-the app UI opens but sensor listening will fail with a root-privileges error.
-
-## Credits
-
-- Sensor reading & IOKit interface: [olvvier/apple-silicon-accelerometer](https://github.com/olvvier/apple-silicon-accelerometer)
-- Vibration detection algorithms: [taigrr/spank](https://github.com/taigrr/spank)
-
-## Settings
+## ⚙️ Settings
 
 ![General Settings](settings-general.png)
 
-## License
+## 🙏 Credits & Open Source Love
 
-MIT
+This project wouldn't be possible without:
+* [olvvier/apple-silicon-accelerometer](https://github.com/olvvier/apple-silicon-accelerometer) for the IOKit interface and sensor reading.
+* [taigrr/spank](https://github.com/taigrr/spank) for the brilliant vibration detection algorithms.
+
+
+---
+
+## 📄 License
+
+**MIT License** — Have fun, break things, and make it your own!
