@@ -10,6 +10,7 @@ struct WaveformView: View {
     @EnvironmentObject var appState: AppState
     
     @State private var waveformData: [Double] = []
+    @State private var waveformMaxVal: Double = 0.1
     @State private var knockMarkers: [KnockMarker] = []
     @State private var isVisible = false
     @State private var currentMagnitude: Double = 0
@@ -101,8 +102,8 @@ struct WaveformView: View {
             let visibleData = Array(waveformData.suffix(maxPoints))
             let pointCount = visibleData.count
             guard pointCount > 1 else { return }
-            
-            let maxVal = max(waveformData.max() ?? 0.1, 0.1)
+
+            let maxVal = waveformMaxVal
             let baseline = canvasSize.height * 0.7
             let scale = canvasSize.height * 0.6 / maxVal
             
@@ -165,7 +166,7 @@ struct WaveformView: View {
             let pointCount = min(waveformData.count, maxPoints)
             guard pointCount > 1 else { return }
             let step = canvasSize.width / CGFloat(pointCount - 1)
-            let maxVal = max(waveformData.max() ?? 0.1, 0.1)
+            let maxVal = waveformMaxVal
             let baseline = canvasSize.height * 0.7
             let scale = canvasSize.height * 0.6 / maxVal
             
@@ -274,6 +275,7 @@ struct WaveformView: View {
     private func updateWaveformData() {
         let data = appState.detector.waveform.slice()
         waveformData = data
+        waveformMaxVal = max(data.max() ?? 0.1, 0.1)
         currentMagnitude = appState.detector.currentMagnitude
         currentRMS = appState.detector.currentRMS
         

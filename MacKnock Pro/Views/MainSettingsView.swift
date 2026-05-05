@@ -178,14 +178,6 @@ struct MainSettingsView: View {
                         isOn: $settings.soundFeedback
                     )
                     
-                    Divider()
-                    
-                    toggleRow(
-                        icon: "bell",
-                        title: "Show Notifications",
-                        subtitle: "Display a notification banner for each knock",
-                        isOn: $settings.showNotification
-                    )
                 }
             }
             
@@ -377,29 +369,30 @@ struct MainSettingsView: View {
     @ViewBuilder
     private var adaptiveMLCard: some View {
         let engine = appState.adaptiveEngine
+        let snap = engine.display  // single reactive read — updates via @Published
         settingsCard {
             VStack(spacing: 14) {
                 // Status header row
                 HStack(spacing: 10) {
                     ZStack {
                         Circle()
-                            .fill(engine.isCalibratedEnough
+                            .fill(snap.isCalibratedEnough
                                   ? Color(hex: "00B894").opacity(0.15)
                                   : Color(hex: "FDCB6E").opacity(0.15))
                             .frame(width: 36, height: 36)
 
-                        Image(systemName: engine.isCalibratedEnough ? "checkmark.seal.fill" : "brain")
+                        Image(systemName: snap.isCalibratedEnough ? "checkmark.seal.fill" : "brain")
                             .font(.system(size: 15))
-                            .foregroundColor(engine.isCalibratedEnough
+                            .foregroundColor(snap.isCalibratedEnough
                                             ? Color(hex: "00B894")
                                             : Color(hex: "FDCB6E"))
                     }
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(engine.isCalibratedEnough ? "Calibrated" : "Learning…")
+                        Text(snap.isCalibratedEnough ? "Calibrated" : "Learning…")
                             .font(.system(size: 13, weight: .semibold))
 
-                        Text(engine.statusDescription)
+                        Text(snap.statusDescription)
                             .font(.system(size: 10))
                             .foregroundColor(.secondary)
                     }
@@ -408,7 +401,7 @@ struct MainSettingsView: View {
 
                     // Separation confidence bar
                     VStack(alignment: .trailing, spacing: 3) {
-                        Text(String(format: "%.0f%%", engine.confidence * 100))
+                        Text(String(format: "%.0f%%", snap.confidence * 100))
                             .font(.system(size: 11, weight: .bold, design: .monospaced))
                             .foregroundColor(Color(hex: "6C5CE7"))
 
@@ -425,7 +418,7 @@ struct MainSettingsView: View {
                                             endPoint: .trailing
                                         )
                                     )
-                                    .frame(width: geo.size.width * engine.confidence)
+                                    .frame(width: geo.size.width * snap.confidence)
                             }
                         }
                         .frame(width: 80, height: 6)
@@ -442,7 +435,7 @@ struct MainSettingsView: View {
                 HStack(spacing: 0) {
                     adaptiveStat(
                         label: "Noise Floor",
-                        value: String(format: "%.4f g", engine.noiseMean),
+                        value: String(format: "%.4f g", snap.noiseMean),
                         color: Color(hex: "74B9FF")
                     )
 
@@ -450,7 +443,7 @@ struct MainSettingsView: View {
 
                     adaptiveStat(
                         label: "Adaptive Threshold",
-                        value: String(format: "%.4f g", engine.threshold),
+                        value: String(format: "%.4f g", snap.threshold),
                         color: Color(hex: "6C5CE7")
                     )
 
@@ -458,7 +451,7 @@ struct MainSettingsView: View {
 
                     adaptiveStat(
                         label: "Your Knock Mean",
-                        value: String(format: "%.4f g", engine.knockMean),
+                        value: String(format: "%.4f g", snap.knockMean),
                         color: Color(hex: "00B894")
                     )
                 }

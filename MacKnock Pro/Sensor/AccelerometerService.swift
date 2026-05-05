@@ -51,6 +51,10 @@ final class AccelerometerService: ObservableObject {
     
     /// Atomic flag to signal the sensor loop to stop
     private let _shouldStop = OSAllocatedUnfairLock(initialState: false)
+
+    /// Monotonically increasing counter; incremented on every stop() so a
+    /// delayed cleanup Task from an old session doesn't clobber a new start().
+    private let _generation = OSAllocatedUnfairLock(initialState: 0)
     
     /// Callback to process a sample inline on the sensor thread
     private let _onSample = CallbackBox()
@@ -117,6 +121,7 @@ final class AccelerometerService: ObservableObject {
     
     /// Stop reading accelerometer data.
     func stop() {
+        _generation.withLock { $0 += 1 }
         _shouldStop.withLock { $0 = true }
         isRunning = false
     }
@@ -172,11 +177,15 @@ final class AccelerometerService: ObservableObject {
         // Cleanup
         IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
         buffer.deallocate()
-        
+
+        // Capture the generation this session was started with so the Task
+        // below only clears isRunning if no new start() has been called since.
+        let myGeneration = _generation.withLock { $0 }
         Task { @MainActor [weak self] in
-            self?.hidDevice = nil
-            self?.reportBuffer = nil
-            self?.isRunning = false
+            guard let self, self._generation.withLock({ $0 }) == myGeneration else { return }
+            self.hidDevice = nil
+            self.reportBuffer = nil
+            self.isRunning = false
         }
     }
     
