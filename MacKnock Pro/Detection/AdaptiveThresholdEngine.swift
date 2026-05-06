@@ -48,11 +48,29 @@ struct AdaptiveThresholdState: Codable {
     var confirmedKnocks: Int = 0
 }
 
+// MARK: - Display Snapshot (SwiftUI-bindable, main-thread only)
+
+/// Value-type snapshot published to the main actor so SwiftUI views update reactively.
+struct AdaptiveDisplayState {
+    var threshold: Double = 0.05
+    var confidence: Double = 0.0
+    var isCalibratedEnough: Bool = false
+    var noiseMean: Double = 0.005
+    var knockMean: Double = 0.12
+    var statusDescription: String = "Learning…"
+}
+
 // MARK: - Adaptive Threshold Engine
 
 final class AdaptiveThresholdEngine: ObservableObject {
 
-    // MARK: - Public State (Thread-Safe)
+    // MARK: - Published Display State (main-thread, SwiftUI-reactive)
+
+    /// Snapshot updated from the sensor thread via DispatchQueue.main.async.
+    /// Use this in SwiftUI views — do NOT read the lock-protected vars directly.
+    @Published private(set) var display = AdaptiveDisplayState()
+
+    // MARK: - Internal State (Thread-Safe via stateLock)
 
     private let stateLock = OSAllocatedUnfairLock()
 
@@ -172,8 +190,8 @@ final class AdaptiveThresholdEngine: ObservableObject {
             recomputeThreshold()
             refreshPublished()
 
-            // Persist every 100 samples
-            if _state.samplesSeen % 100 == 0 {
+            // Persist every 500 samples (~5 s at normal detection rate)
+            if _state.samplesSeen % 500 == 0 {
                 saveLocked()
             }
         }
@@ -192,19 +210,8 @@ final class AdaptiveThresholdEngine: ObservableObject {
         return amplitude >= threshold
     }
 
-    /// Current calibration status description for UI
-    var statusDescription: String {
-        return stateLock.withLock {
-            if _state.confirmedKnocks < warmupKnocks {
-                let remaining = warmupKnocks - _state.confirmedKnocks
-                return "Learning… (\(remaining) knock\(remaining == 1 ? "" : "s") to calibrate)"
-            } else if _confidence < 0.4 {
-                return "Calibrating… (knock harder for better separation)"
-            } else {
-                return String(format: "Calibrated (%.0f%% confidence)", _confidence * 100)
-            }
-        }
-    }
+    /// Current calibration status description for UI (reads from the published snapshot).
+    var statusDescription: String { display.statusDescription }
 
     // MARK: - Reset
 
@@ -299,6 +306,32 @@ final class AdaptiveThresholdEngine: ObservableObject {
     private func refreshPublished() {
         _noiseMean = _state.noiseMean
         _knockMean = _state.knockMean
+
+        // Build a snapshot while still inside the lock (all values consistent),
+        // then push it to the main thread so SwiftUI views update reactively.
+        let snap = AdaptiveDisplayState(
+            threshold: _threshold,
+            confidence: _confidence,
+            isCalibratedEnough: _isCalibratedEnough,
+            noiseMean: _state.noiseMean,
+            knockMean: _state.knockMean,
+            statusDescription: buildStatusDescription()
+        )
+        DispatchQueue.main.async { [weak self] in
+            self?.display = snap
+        }
+    }
+
+    /// Builds the status string from already-locked state. Must be called inside stateLock.
+    private func buildStatusDescription() -> String {
+        if _state.confirmedKnocks < warmupKnocks {
+            let remaining = warmupKnocks - _state.confirmedKnocks
+            return "Learning… (\(remaining) knock\(remaining == 1 ? "" : "s") to calibrate)"
+        } else if _confidence < 0.4 {
+            return "Calibrating… (knock harder for better separation)"
+        } else {
+            return String(format: "Calibrated (%.0f%% confidence)", _confidence * 100)
+        }
     }
 
     private func saveLocked() {

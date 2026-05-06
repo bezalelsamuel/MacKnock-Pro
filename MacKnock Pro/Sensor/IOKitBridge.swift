@@ -44,16 +44,6 @@ enum SPUConstants {
     static let defaultDecimation: Int = 8
 }
 
-// MARK: - Data Types
-
-/// A single 3-axis accelerometer/gyroscope sample
-struct SensorSample {
-    let x: Double  // g (accel) or deg/s (gyro)
-    let y: Double
-    let z: Double
-    let timestamp: Double  // monotonic time in seconds
-}
-
 // MARK: - IOKit Bridge
 
 /// Provides low-level IOKit HID access to the Apple Silicon MEMS accelerometer

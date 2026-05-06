@@ -196,6 +196,9 @@ final class AppState: ObservableObject {
             return
         }
 
+        // Reset stale pre-sleep filter/detector state before restarting
+        detector.reset()
+
         // Connect detector to sensor inline
         accelerometer.setCallback { [weak detector, weak patternRecognizer] ax, ay, az, time in
             detector?.process(ax: ax, ay: ay, az: az, time: time)

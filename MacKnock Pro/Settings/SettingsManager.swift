@@ -28,9 +28,6 @@ final class SettingsManager: ObservableObject {
     /// Whether to play sound feedback on knock detection
     @AppStorage("soundFeedback") var soundFeedback = true
     
-    /// Whether to show notification on knock
-    @AppStorage("showNotification") var showNotification = false
-    
     // MARK: - Sensitivity Settings
 
     /// Amplitude floor — adaptive engine will never trigger below this value (0.005 - 0.30).
@@ -83,7 +80,6 @@ final class SettingsManager: ObservableObject {
     func resetToDefaults() {
         isEnabled = true
         soundFeedback = true
-        showNotification = false
         minAmplitude = 0.01
         cooldownMs = 750
         menuBarIconStyle = .waveform

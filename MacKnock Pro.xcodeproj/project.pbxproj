@@ -21,6 +21,7 @@
 		A97E25C9A6898EFDFADB67EB /* KnockProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83EB2C7C6D6D229A918DF25 /* KnockProfile.swift */; };
 		B0AF38DF29F4C4C7DF18BF1B /* AccelerometerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAC417848BDD1C7BA057BC9D /* AccelerometerService.swift */; };
 		B89213ABE864F8943F4B9B93 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D693890C38B6F8DAA4C20F9C /* MenuBarView.swift */; };
+		AA11BB22CC33DD44EE55FF66 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF67 /* Color+Hex.swift */; };
 		C69DBAE62970DF646454A542 /* KnockDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9783ACBB865C73E1933EB6F6 /* KnockDetector.swift */; };
 		E9CBB145784C58D7602AB035 /* KnockPattern.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C215E100EE0C704AECBAE6D /* KnockPattern.swift */; };
 		EAB8D953D597535BFB8DE26F /* MainSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFC71334D1D1FA8B7742679E /* MainSettingsView.swift */; };
@@ -45,6 +46,7 @@
 		CFC71334D1D1FA8B7742679E /* MainSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSettingsView.swift; sourceTree = "<group>"; };
 		D3F333214E4C56668CB52B09 /* HighPassFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighPassFilter.swift; sourceTree = "<group>"; };
 		D693890C38B6F8DAA4C20F9C /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF67 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		D7676C0BA1CC270B7C3743BD /* CustomScriptAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomScriptAction.swift; sourceTree = "<group>"; };
 		DDD506E6DF38773046DB8621 /* RingBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingBuffer.swift; sourceTree = "<group>"; };
 		E4B8DCFE282F8F1CE2DD5FF6 /* MacKnock_Pro.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MacKnock_Pro.entitlements; sourceTree = "<group>"; };
@@ -114,6 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				F4D6E029CB7747417CB1B9E6 /* ActionConfigView.swift */,
+				AA11BB22CC33DD44EE55FF67 /* Color+Hex.swift */,
 				CFC71334D1D1FA8B7742679E /* MainSettingsView.swift */,
 				D693890C38B6F8DAA4C20F9C /* MenuBarView.swift */,
 				401BB52A7EEE4E1110A0FA1D /* WaveformView.swift */,
@@ -216,6 +219,7 @@
 				F4D705CD1955B943F900B10A /* MacKnockProApp.swift in Sources */,
 				EAB8D953D597535BFB8DE26F /* MainSettingsView.swift in Sources */,
 				200DFE7BF14D34390CAB5F71 /* MediaActions.swift in Sources */,
+				AA11BB22CC33DD44EE55FF66 /* Color+Hex.swift in Sources */,
 				B89213ABE864F8943F4B9B93 /* MenuBarView.swift in Sources */,
 				369242D4D3C8DB9CC9C9C9F6 /* RingBuffer.swift in Sources */,
 				76B941A0B767F55EF07DE715 /* SettingsManager.swift in Sources */,

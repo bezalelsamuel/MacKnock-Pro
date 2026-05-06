@@ -123,9 +123,8 @@ final class KnockDetector: ObservableObject {
     // (Previous 0.95 allowed 0.8Hz movements to leak through as knocks).
     private let highPassFilter = HighPassFilter(alpha: 0.85)
     
-    // Waveform history
+    // Waveform history (magnitude only; read by UI via .slice())
     let waveform: RingFloat
-    let waveformXYZ: RingVec3
     
     // STA/LTA detector (3 timescales)
     private var sta: [Double] = [0, 0, 0]
@@ -144,21 +143,21 @@ final class KnockDetector: ObservableObject {
     private let cusumK: Double = 0.0005
     private let cusumH: Double = 0.01
     
-    // Kurtosis
-    private let kurtBuf: RingFloat
+    // Kurtosis (sensor-thread only — no lock needed)
+    private let kurtBuf: UnsafeRingFloat
     private var kurtosis: Double = 3.0
     private var kurtDecimation = 0
-    
-    // Peak / MAD / Crest factor
-    private let peakBuf: RingFloat
+
+    // Peak / MAD / Crest factor (sensor-thread only — no lock needed)
+    private let peakBuf: UnsafeRingFloat
     private var crest: Double = 1.0
     private var rms: Double = 0
     private var peak: Double = 0
     private var madSigma: Double = 0
-    
-    // RMS trend
-    private let rmsTrend: RingFloat
-    private let rmsWindow: RingFloat
+
+    // RMS trend (sensor-thread only — no lock needed)
+    private let rmsTrend: UnsafeRingFloat
+    private let rmsWindow: UnsafeRingFloat
     private var rmsDecimation = 0
     
     // Event history
@@ -175,23 +174,15 @@ final class KnockDetector: ObservableObject {
     init() {
         let n5 = sampleRate * 5
         waveform = RingFloat(capacity: n5)
-        waveformXYZ = RingVec3(capacity: n5)
-        kurtBuf = RingFloat(capacity: 100)
-        peakBuf = RingFloat(capacity: 200)
-        rmsTrend = RingFloat(capacity: 100)
-        rmsWindow = RingFloat(capacity: sampleRate)
+        kurtBuf = UnsafeRingFloat(capacity: 100)
+        peakBuf = UnsafeRingFloat(capacity: 200)
+        rmsTrend = UnsafeRingFloat(capacity: 100)
+        rmsWindow = UnsafeRingFloat(capacity: sampleRate)
     }
     
     // MARK: - Processing
     
-    /// Process one accelerometer sample and run all detection algorithms.
-    /// Returns the dynamic (gravity-removed) magnitude.
-    @discardableResult
-    func process(sample: SensorSample) -> Double {
-        return process(ax: sample.x, ay: sample.y, az: sample.z, time: sample.timestamp)
-    }
-    
-    /// Process one accelerometer sample with explicit values.
+    /// Process one accelerometer sample. Returns the gravity-removed magnitude.
     @discardableResult
     func process(ax: Double, ay: Double, az: Double, time: Double) -> Double {
         sampleCount += 1
@@ -202,7 +193,6 @@ final class KnockDetector: ObservableObject {
         
         stateLock.withLock { _currentMagnitude = mag }
         waveform.push(mag)
-        waveformXYZ.push(x: hp.x, y: hp.y, z: hp.z)
         
         // RMS trend tracking
         rmsWindow.push(mag)
@@ -332,9 +322,8 @@ final class KnockDetector: ObservableObject {
             
             stateLock.withLock {
                 _events.append(event)
-                // Keep max 500 events
                 if _events.count > 500 {
-                    _events = Array(_events.suffix(500))
+                    _events.removeFirst(_events.count - 500)
                 }
             }
 
@@ -437,7 +426,6 @@ final class KnockDetector: ObservableObject {
     func reset() {
         highPassFilter.reset()
         waveform.reset()
-        waveformXYZ.reset()
         kurtBuf.reset()
         peakBuf.reset()
         rmsTrend.reset()
